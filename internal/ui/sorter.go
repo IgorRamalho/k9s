@@ -1,7 +1,9 @@
 package ui
 
 import (
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/derailed/k9s/internal/resource"
@@ -129,10 +131,37 @@ func isIntegerSort(asc bool, c1, c2 string) (bool, bool) {
 	return n1 > n2, true
 }
 
+func isContainerReadySort(asc bool, c1, c2 string) (bool, bool) {
+	n1, ok1 := isContainerReady(c1)
+	n2, ok2 := isContainerReady(c2)
+	if !ok1 || !ok2 {
+		return false, false
+	}
+
+	if asc {
+		return n1 <= n2, true
+	}
+	return n1 >= n2, true
+}
+
 func isDuration(s string) (time.Duration, bool) {
 	d, err := time.ParseDuration(s)
 	if err != nil {
 		return d, false
 	}
 	return d, true
+}
+
+func isContainerReady(s string) (int, bool) {
+	var readyContainersRegex = regexp.MustCompile(`^[0-9]+/[0-9]+$`)
+
+	containersStatuses := strings.Split(s, "/")
+	readyContainers, err1 := strconv.Atoi(containersStatuses[0])
+	totalContainers, err2 := strconv.Atoi(containersStatuses[1])
+
+	if err1 != nil || err2 != nil {
+		return 0, false
+	}
+
+	return totalContainers - readyContainers, readyContainersRegex.MatchString(s)
 }
