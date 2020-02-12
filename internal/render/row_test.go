@@ -144,6 +144,34 @@ func TestRowsSortText(t *testing.T) {
 				{Fields: []string{"blee-duh", "duh"}},
 			},
 		},
+		"readyContainersAsc": {
+			rows: render.Rows{
+				{Fields: []string{"1/2", "duh"}},
+				{Fields: []string{"1/1", "blee"}},
+				{Fields: []string{"2/4", "dah"}},
+			},
+			col: 0,
+			asc: true,
+			e: render.Rows{
+				{Fields: []string{"1/2", "duh"}},
+				{Fields: []string{"2/4", "dah"}},
+				{Fields: []string{"1/1", "blee"}},
+			},
+		},
+		"readyContainersDesc": {
+			rows: render.Rows{
+				{Fields: []string{"1/2", "duh"}},
+				{Fields: []string{"1/1", "blee"}},
+				{Fields: []string{"2/4", "dah"}},
+			},
+			col: 0,
+			asc: false,
+			e: render.Rows{
+				{Fields: []string{"1/1", "blee"}},
+				{Fields: []string{"2/4", "dah"}},
+				{Fields: []string{"1/2", "duh"}},
+			},
+		},
 	}
 
 	for k := range uu {

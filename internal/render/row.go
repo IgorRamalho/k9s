@@ -2,6 +2,8 @@ package render
 
 import (
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 
 	"vbom.ml/util/sortorder"
@@ -116,6 +118,11 @@ func (s RowSorter) Less(i, j int) bool {
 
 // Less return true if c1 < c2.
 func Less(asc bool, c1, c2 string) bool {
+
+	if o, ok := isContainerReadySort(asc, c1, c2); ok {
+		return o
+	}
+
 	if o, ok := isDurationSort(asc, c1, c2); ok {
 		return o
 	}
@@ -125,6 +132,38 @@ func Less(asc bool, c1, c2 string) bool {
 		return b
 	}
 	return !b
+}
+
+func isContainerReadySort(asc bool, s1, s2 string) (bool, bool) {
+	r1, ok1 := isContainerReady(s1)
+	r2, ok2 := isContainerReady(s2)
+	if !ok1 || !ok2 {
+		return false, false
+	}
+
+	if asc {
+		return r1 <= r2, true
+	}
+	return r1 >= r2, true
+}
+
+func isContainerReady(s string) (float64, bool) {
+	if !strings.Contains(s, "/") {
+		return 0, false
+	}
+
+	containers := strings.Split(s, "/")
+	ready, err1 := strconv.ParseFloat(containers[0], 64)
+	total, err2 := strconv.ParseFloat(containers[1], 64)
+	if err1 != nil || err2 != nil {
+		return 0, false
+	}
+
+	if total == 0 {
+		return 0, true
+	}
+
+	return ready/total + total/100, true
 }
 
 func isDurationSort(asc bool, s1, s2 string) (bool, bool) {
