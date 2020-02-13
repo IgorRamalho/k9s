@@ -26,14 +26,14 @@ type Configurator struct {
 	Bench    *config.Bench
 }
 
-// HasSkins returns true if a skin file was located.
-func (c *Configurator) HasSkins() bool {
+// HasSkin returns true if a skin file was located.
+func (c *Configurator) HasSkin() bool {
 	return c.skinFile != ""
 }
 
 // StylesUpdater watches for skin file changes.
 func (c *Configurator) StylesUpdater(ctx context.Context, s synchronizer) error {
-	if !c.HasSkins() {
+	if !c.HasSkin() {
 		return nil
 	}
 
@@ -103,6 +103,9 @@ func (c *Configurator) RefreshStyles(context string) {
 
 func (c *Configurator) updateStyles(f string) {
 	c.skinFile = f
+	if !c.HasSkin() {
+		c.Styles.DefaultSkin()
+	}
 	c.Styles.Update()
 
 	render.StdColor = config.AsColor(c.Styles.Frame().Status.NewColor)
